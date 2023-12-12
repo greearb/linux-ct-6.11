@@ -422,7 +422,7 @@ static int mtk_pcs_lynxi_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int mtk_pcs_lynxi_remove(struct platform_device *pdev)
+static void mtk_pcs_lynxi_remove(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct mtk_pcs_lynxi *cur, *tmp;
@@ -435,8 +435,6 @@ static int mtk_pcs_lynxi_remove(struct platform_device *pdev)
 			break;
 		}
 	mutex_unlock(&instance_mutex);
-
-	return 0;
 }
 
 static const struct of_device_id mtk_pcs_lynxi_of_match[] = {
