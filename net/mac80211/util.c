@@ -3592,7 +3592,6 @@ void ieee80211_dfs_cac_cancel(struct ieee80211_local *local)
 	lockdep_assert_wiphy(local->hw.wiphy);
 
 	list_for_each_entry(sdata, &local->interfaces, list) {
-		sdata_info(sdata, "dfs_cac_cancel, canceling dfs-cac-timer-work.\n");
 		wiphy_delayed_work_cancel(local->hw.wiphy,
 					  &sdata->dfs_cac_timer_work);
 
