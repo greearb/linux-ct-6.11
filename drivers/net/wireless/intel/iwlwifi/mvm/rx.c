@@ -1110,6 +1110,9 @@ static void iwl_mvm_update_esr_mode_tpt(struct iwl_mvm *mvm)
 		return;
 	}
 
+	IWL_DEBUG_INFO(mvm, "Secondary Link %d: Tx MPDUs: %ld. Rx MPDUs: %ld\n",
+		       sec_link, sec_link_tx, sec_link_rx);
+
 	/* Calculate the percentage of the secondary link TX/RX */
 	sec_link_tx_perc = total_tx ? sec_link_tx * 100 / total_tx : 0;
 	sec_link_rx_perc = total_rx ? sec_link_rx * 100 / total_rx : 0;
