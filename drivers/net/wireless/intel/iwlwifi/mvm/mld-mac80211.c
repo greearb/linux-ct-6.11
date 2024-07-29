@@ -273,6 +273,9 @@ static int iwl_mvm_esr_mode_active(struct iwl_mvm *mvm,
 	 */
 	iwl_mvm_restart_mpdu_count(mvm, mvmvif);
 
+	iwl_dbg_tlv_time_point(&mvm->fwrt, IWL_FW_INI_TIME_ESR_LINK_UP,
+			       NULL);
+
 	return ret;
 }
 
@@ -454,6 +457,9 @@ static int iwl_mvm_esr_mode_inactive(struct iwl_mvm *mvm,
 
 	/* Start a new counting window */
 	iwl_mvm_restart_mpdu_count(mvm, mvmvif);
+
+	iwl_dbg_tlv_time_point(&mvm->fwrt, IWL_FW_INI_TIME_ESR_LINK_DOWN,
+			       NULL);
 
 	return ret;
 }
