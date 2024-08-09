@@ -3128,12 +3128,6 @@ iwl_mvm_bt_coex_calculate_esr_mode(struct iwl_mvm *mvm,
 int iwl_mvm_esr_non_bss_link(struct iwl_mvm *mvm, struct ieee80211_vif *vif,
 			     unsigned int link_id, bool active);
 
-void
-iwl_mvm_send_ap_tx_power_constraint_cmd(struct iwl_mvm *mvm,
-					struct ieee80211_vif *vif,
-					struct ieee80211_bss_conf *bss_conf,
-					bool is_ap);
-
 static inline int iwl_mvm_sum_sigs_2(int a, int b)
 {
        int diff;
