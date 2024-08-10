@@ -129,6 +129,9 @@ mt76_tx_status_skb_add(struct mt76_dev *dev, struct mt76_wcid *wcid,
 	struct mt76_tx_cb *cb = mt76_tx_skb_cb(skb);
 	int pid;
 
+	mtk_dbg(dev, TXV, "mt76-tx-status-skb-add, skb: %p  wcid->idx: %d\n",
+		skb, wcid->idx);
+
 	memset(cb, 0, sizeof(*cb));
 
 	if (!wcid || !rcu_access_pointer(dev->wcid[wcid->idx]))
@@ -179,6 +182,9 @@ mt76_tx_status_skb_get(struct mt76_dev *dev, struct mt76_wcid *wcid, int pktid,
 	struct sk_buff *skb;
 	struct sk_buff *skb2;
 	int id = -1;
+
+	mtk_dbg(dev, TXV, "mt76-tx-status-skb-get, pktid: %d  wcid->idx: %d\n",
+		pktid, wcid->idx);
 
 	lockdep_assert_held(&dev->status_lock);
 
@@ -274,8 +280,8 @@ void __mt76_tx_complete_skb(struct mt76_dev *dev, u16 wcid_idx, struct sk_buff *
 	struct sk_buff_head list;
 	struct ieee80211_rate_status status_rate = { 0 };
 
-	mtk_dbg(dev, TXV, "mt76-tx-complete-skb, wcid_idx: %d\n",
-		wcid_idx);
+	mtk_dbg(dev, TXV, "mt76-tx-complete-skb, wcid_idx: %d skb: %p\n",
+		wcid_idx, skb);
 	rcu_read_lock();
 
 	if (wcid_idx < ARRAY_SIZE(dev->wcid)) {
@@ -346,8 +352,8 @@ __mt76_tx_queue_skb(struct mt76_phy *phy, int qid, struct sk_buff *skb,
 	non_aql = !info->tx_time_est;
 	idx = dev->queue_ops->tx_queue_skb(phy, q, qid, skb, wcid, sta);
 
-	mtk_dbg(dev, TXV, "mt76-tx-queue-skb, idx: %d  sta: %p\n",
-		idx, sta);
+	mtk_dbg(dev, TXV, "mt76-tx-queue-skb, idx: %d sta: %p skb: %p\n",
+		idx, sta, skb);
 
 	if (idx < 0 || !sta)
 		return idx;
@@ -371,8 +377,8 @@ mt76_tx(struct mt76_phy *phy, struct ieee80211_sta *sta,
 {
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 
-	mtk_dbg(phy->dev, TXV, "mt76-tx, testmode enabled: %d, sta: %pM wcid: %d skb-len: %d\n",
-		mt76_testmode_enabled(phy), sta->addr, wcid ? wcid->idx : -1, skb->len);
+	mtk_dbg(phy->dev, TXV, "mt76-tx, testmode enabled: %d, sta: %p sta->addr: %pM wcid->idx: %d skb: %p skb-len: %d\n",
+		mt76_testmode_enabled(phy), sta, sta ? sta->addr : NULL, wcid ? wcid->idx : -1, skb, skb->len);
 
 	if (mt76_testmode_enabled(phy)) {
 		ieee80211_free_txskb(phy->hw, skb);
@@ -592,8 +598,8 @@ mt76_txq_schedule_list(struct mt76_phy *phy, enum mt76_txq_id qid)
 			return -EBUSY;
 		}
 
-		mtk_dbg(dev, TXV, "mt76-txq-schedule-list, q->queued: %d q-stopped: %d qid: %d\n",
-			q->queued, mt76_txq_stopped(q), qid);
+		mtk_dbg(dev, TXV, "mt76-txq-schedule-list, q->queued: %d q-stopped: %d qid: %d q->ndesc: %d\n",
+			q->queued, mt76_txq_stopped(q), qid, q->ndesc);
 		if (dev->queue_ops->tx_cleanup &&
 		    q->queued + 2 * MT_TXQ_FREE_THR >= q->ndesc) {
 			dev->queue_ops->tx_cleanup(dev, q, false);
@@ -601,7 +607,8 @@ mt76_txq_schedule_list(struct mt76_phy *phy, enum mt76_txq_id qid)
 
 		txq = ieee80211_next_txq(phy->hw, qid);
 		if (!txq) {
-			mtk_dbg(dev, TXV, "mt76-txq-schedule-list, no next txq\n");
+			mtk_dbg(dev, TXV, "mt76-txq-schedule-list, no ieee next txq, qid: %d, ret: %d\n",
+				qid, ret);
 			break;
 		}
 
@@ -675,6 +682,9 @@ mt76_txq_schedule_pending_wcid(struct mt76_phy *phy, struct mt76_wcid *wcid)
 	struct sk_buff *skb;
 	int ret = 0;
 
+	mtk_dbg(phy->dev, TXV, "mt76-txq-sched-pending-wcid, wcid->idx: %d\n",
+		wcid->idx);
+
 	spin_lock(&wcid->tx_pending.lock);
 	while ((skb = skb_peek(&wcid->tx_pending)) != NULL) {
 		struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
@@ -689,6 +699,8 @@ mt76_txq_schedule_pending_wcid(struct mt76_phy *phy, struct mt76_wcid *wcid)
 
 		q = phy->q_tx[qid];
 		if (mt76_txq_stopped(q)) {
+			mtk_dbg(phy->dev, TXV, "mt76-txq-sched-pending-wcid, wcid->idx: %d queue-stopped, qid: %d\n",
+				wcid->idx, qid);
 			ret = -1;
 			break;
 		}
@@ -711,6 +723,9 @@ mt76_txq_schedule_pending_wcid(struct mt76_phy *phy, struct mt76_wcid *wcid)
 
 static void mt76_txq_schedule_pending(struct mt76_phy *phy)
 {
+	mtk_dbg(phy->dev, TXV, "mt76-txq-sched-pending, tx-list empty: %d\n",
+		list_empty(&phy->tx_list));
+
 	if (list_empty(&phy->tx_list))
 		return;
 
@@ -865,6 +880,8 @@ EXPORT_SYMBOL_GPL(mt76_skb_adjust_pad);
 void mt76_queue_tx_complete(struct mt76_dev *dev, struct mt76_queue *q,
 			    struct mt76_queue_entry *e)
 {
+	mtk_dbg(dev, TXV, "mt76-queue-tx-complete, q: %p skb: %p\n",
+		q, e->skb);
 	if (e->skb)
 		dev->drv->tx_complete_skb(dev, e);
 
