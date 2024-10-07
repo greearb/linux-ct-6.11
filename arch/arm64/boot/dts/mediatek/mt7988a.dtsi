@@ -129,15 +129,6 @@
 		};
 	};
 
-	fan: pwm-fan {
-		compatible = "pwm-fan";
-		/* cooling level (0, 1, 2, 3) : (0% duty, 30% duty, 50% duty, 100% duty) */
-		cooling-levels = <0 80 128 255>;
-		#cooling-cells = <2>;
-		#thermal-sensor-cells = <1>;
-		status = "disabled";
-	};
-
 	oscillator-40m {
 		compatible = "fixed-clock";
 		clock-frequency = <40000000>;
@@ -561,9 +552,19 @@
 			};
 		};
 
+		fan: pwm-fan {
+			compatible = "pwm-fan";
+			/* cooling level (0, 1, 2) : (0% duty, 50% duty, 100% duty) */
+			cooling-levels = <0 128 255>;
+			#cooling-cells = <2>;
+			#thermal-sensor-cells = <1>;
+			status = "disabled";
+		};
+
 		pwm: pwm@10048000 {
 			compatible = "mediatek,mt7988-pwm";
 			reg = <0 0x10048000 0 0x1000>;
+			#pwm-cells = <2>;
 			clocks = <&infracfg CLK_INFRA_66M_PWM_BCK>,
 				 <&infracfg CLK_INFRA_66M_PWM_HCK>,
 				 <&infracfg CLK_INFRA_66M_PWM_CK1>,
@@ -575,8 +576,7 @@
 				 <&infracfg CLK_INFRA_66M_PWM_CK7>,
 				 <&infracfg CLK_INFRA_66M_PWM_CK8>;
 			clock-names = "top", "main", "pwm1", "pwm2", "pwm3",
-				      "pwm4", "pwm5", "pwm6", "pwm7", "pwm8";
-			#pwm-cells = <2>;
+				      "pwm4","pwm5","pwm6","pwm7","pwm8";
 			status = "disabled";
 		};
 
@@ -595,8 +595,6 @@
 					 <&sgmiisys0 CLK_SGM0_TX_EN>,
 					 <&sgmiisys0 CLK_SGM0_RX_EN>;
 				clock-names = "sgmii_sel", "sgmii_tx", "sgmii_rx";
-				phys = <&xfi_tphy0>;
-				#pcs-cells = <0>;
 			};
 		};
 
@@ -615,8 +613,6 @@
 					 <&sgmiisys1 CLK_SGM1_TX_EN>,
 					 <&sgmiisys1 CLK_SGM1_RX_EN>;
 				clock-names = "sgmii_sel", "sgmii_tx", "sgmii_rx";
-				phys = <&xfi_tphy1>;
-				#pcs-cells = <0>;
 			};
 		};
 
@@ -625,8 +621,6 @@
 			reg = <0 0x10080000 0 0x1000>;
 			resets = <&watchdog MT7988_TOPRGU_XFI0_GRST>;
 			clocks = <&topckgen CLK_TOP_USXGMII_SBUS_0_SEL>;
-			phys = <&xfi_tphy0>;
-			#pcs-cells = <0>;
 		};
 
 		usxgmiisys1: pcs@10081000 {
@@ -634,8 +628,6 @@
 			reg = <0 0x10081000 0 0x1000>;
 			resets = <&watchdog MT7988_TOPRGU_XFI1_GRST>;
 			clocks = <&topckgen CLK_TOP_USXGMII_SBUS_1_SEL>;
-			phys = <&xfi_tphy1>;
-			#pcs-cells = <0>;
 		};
 
 		mcusys: mcusys@100e0000 {
@@ -796,7 +788,8 @@
 		};
 
 		ssusb0: usb@11190000 {
-			compatible = "mediatek,mt7988-xhci", "mediatek,mtk-xhci";
+			compatible = "mediatek,mt7988-xhci",
+				     "mediatek,mtk-xhci";
 			reg = <0 0x11190000 0 0x2e00>,
 			      <0 0x11193e00 0 0x0100>;
 			reg-names = "mac", "ippc";
@@ -804,11 +797,15 @@
 			phys = <&xphyu2port0 PHY_TYPE_USB2>,
 			       <&xphyu3port0 PHY_TYPE_USB3>;
 			clocks = <&infracfg CLK_INFRA_USB_SYS>,
+				 <&infracfg CLK_INFRA_USB_XHCI>,
 				 <&infracfg CLK_INFRA_USB_REF>,
 				 <&infracfg CLK_INFRA_66M_USB_HCK>,
-				 <&infracfg CLK_INFRA_133M_USB_HCK>,
-				 <&infracfg CLK_INFRA_USB_XHCI>;
-			clock-names = "sys_ck", "ref_ck", "mcu_ck", "dma_ck", "xhci_ck";
+				 <&infracfg CLK_INFRA_133M_USB_HCK>;
+			clock-names = "sys_ck",
+				      "xhci_ck",
+				      "ref_ck",
+				      "mcu_ck",
+				      "dma_ck";
 			#address-cells = <2>;
 			#size-cells = <2>;
 			mediatek,p0_speed_fixup;
@@ -816,7 +813,8 @@
 		};
 
 		ssusb1: usb@11200000 {
-			compatible = "mediatek,mt7988-xhci", "mediatek,mtk-xhci";
+			compatible = "mediatek,mt7988-xhci",
+				     "mediatek,mtk-xhci";
 			reg = <0 0x11200000 0 0x2e00>,
 			      <0 0x11203e00 0 0x0100>;
 			reg-names = "mac", "ippc";
@@ -824,11 +822,15 @@
 			phys = <&tphyu2port0 PHY_TYPE_USB2>,
 			       <&tphyu3port0 PHY_TYPE_USB3>;
 			clocks = <&infracfg CLK_INFRA_USB_SYS_CK_P1>,
+				 <&infracfg CLK_INFRA_USB_XHCI_CK_P1>,
 				 <&infracfg CLK_INFRA_USB_CK_P1>,
 				 <&infracfg CLK_INFRA_66M_USB_HCK_CK_P1>,
-				 <&infracfg CLK_INFRA_133M_USB_HCK_CK_P1>,
-				 <&infracfg CLK_INFRA_USB_XHCI_CK_P1>;
-			clock-names = "sys_ck", "ref_ck", "mcu_ck", "dma_ck", "xhci_ck";
+				 <&infracfg CLK_INFRA_133M_USB_HCK_CK_P1>;
+			clock-names = "sys_ck",
+				      "xhci_ck",
+				      "ref_ck",
+				      "mcu_ck",
+				      "dma_ck";
 			#address-cells = <2>;
 			#size-cells = <2>;
 			status = "disabled";
@@ -1225,7 +1227,6 @@
 				gsw_phy0: ethernet-phy@0 {
 					compatible = "ethernet-phy-ieee802.3-c22";
 					reg = <0>;
-					interrupts = <0>;
 					phy-mode = "internal";
 					nvmem-cells = <&phy_calibration_p0>;
 					nvmem-cell-names = "phy-cal-data";
@@ -1251,7 +1252,6 @@
 				gsw_phy1: ethernet-phy@1 {
 					compatible = "ethernet-phy-ieee802.3-c22";
 					reg = <1>;
-					interrupts = <1>;
 					phy-mode = "internal";
 					nvmem-cells = <&phy_calibration_p1>;
 					nvmem-cell-names = "phy-cal-data";
@@ -1277,7 +1277,6 @@
 				gsw_phy2: ethernet-phy@2 {
 					compatible = "ethernet-phy-ieee802.3-c22";
 					reg = <2>;
-					interrupts = <2>;
 					phy-mode = "internal";
 					nvmem-cells = <&phy_calibration_p2>;
 					nvmem-cell-names = "phy-cal-data";
@@ -1303,7 +1302,6 @@
 				gsw_phy3: ethernet-phy@3 {
 					compatible = "ethernet-phy-ieee802.3-c22";
 					reg = <3>;
-					interrupts = <3>;
 					phy-mode = "internal";
 					nvmem-cells = <&phy_calibration_p3>;
 					nvmem-cell-names = "phy-cal-data";
@@ -1413,6 +1411,7 @@
 				reg = <1>;
 				status = "disabled";
 				pcs-handle = <&sgmiipcs1>, <&usxgmiisys1>;
+				phys = <&xfi_tphy1>;
 			};
 
 			gmac2: mac@2 {
@@ -1420,6 +1419,7 @@
 				reg = <2>;
 				status = "disabled";
 				pcs-handle = <&sgmiipcs0>, <&usxgmiisys0>;
+				phys = <&xfi_tphy0>;
 			};
 
 			mdio_bus: mdio-bus {
@@ -1427,7 +1427,7 @@
 				#size-cells = <0>;
 
 				/* internal 2.5G PHY */
-				int_2p5g_phy: ethernet-phy@f {
+				int_2p5g_phy: ethernet-phy@15 {
 					reg = <15>;
 					compatible = "ethernet-phy-ieee802.3-c45";
 					phy-mode = "internal";
