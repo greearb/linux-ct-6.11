@@ -1241,8 +1241,8 @@ static void mt7996_sta_rc_update(struct ieee80211_hw *hw,
 				 struct ieee80211_link_sta *link_sta,
 				 u32 changed)
 {
-	struct mt7996_sta *msta = (struct mt7996_sta *)sta->drv_priv;
 	struct ieee80211_sta *sta = link_sta->sta;
+	struct mt7996_sta *msta = (struct mt7996_sta *)sta->drv_priv;
 	struct mt7996_phy *phy = mt7996_hw_phy(hw);
 	struct mt7996_dev *dev = phy->dev;
 
