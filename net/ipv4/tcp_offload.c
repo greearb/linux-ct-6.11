@@ -140,6 +140,7 @@ struct sk_buff *tcp_gso_segment(struct sk_buff *skb,
 	__sum16 newcheck;
 	bool ooo_okay, copy_destructor;
 	__wsum delta;
+	u32 sofar = 0;
 
 	th = tcp_hdr(skb);
 	thlen = th->doff * 4;
@@ -218,6 +219,11 @@ struct sk_buff *tcp_gso_segment(struct sk_buff *skb,
 
 		th->seq = htonl(seq);
 		th->cwr = 0;
+		if (++sofar > 32000) {
+			pr_err("ERROR: Found more than %d packets in tcp_gso_segment, bailing out.\n",
+			       (sofar - 1));
+			break;
+		}
 	}
 
 	/* Following permits TCP Small Queues to work well with GSO :
