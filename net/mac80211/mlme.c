@@ -8561,6 +8561,7 @@ int ieee80211_mgd_auth(struct ieee80211_sub_if_data *sdata,
 		auth_alg = WLAN_AUTH_FILS_PK;
 		break;
 	default:
+		sdata_info(sdata, "Invalid auth type in mgt_auth: %d\n", req->auth_type);
 		return -EOPNOTSUPP;
 	}
 
@@ -8669,8 +8670,10 @@ int ieee80211_mgd_auth(struct ieee80211_sub_if_data *sdata,
 	err = ieee80211_prep_connection(sdata, req->bss, req->link_id,
 					req->ap_mld_addr, cont_auth,
 					&conn, false);
-	if (err)
+	if (err) {
+		sdata_info(sdata, "mgd_auth, prep connection failed: %d\n", err);
 		goto err_clear;
+	}
 
 	if (req->link_id >= 0)
 		link = sdata_dereference(sdata->link[req->link_id], sdata);
@@ -8704,6 +8707,7 @@ int ieee80211_mgd_auth(struct ieee80211_sub_if_data *sdata,
 	}
 	ifmgd->auth_data = NULL;
 	kfree(auth_data);
+	sdata_info(sdata, "mgd_auth failed, err: %d\n", err);
 	return err;
 }
 
