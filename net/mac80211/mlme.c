@@ -956,7 +956,8 @@ again:
 
 	if (chanreq->oper.width != ap_chandef->width || ap_mode != conn->mode)
 		sdata_info(sdata,
-			   "regulatory prevented using AP config, downgraded\n");
+			   "regulatory prevented using AP config, downgraded. chanreq width: %d  ap-width: %d  ap-mode: %d conn-mode: %d\n",
+			   chanreq->oper.width, ap_chandef->width, ap_mode, conn->mode);
 
 	if (conn->mode >= IEEE80211_CONN_MODE_HE &&
 	    (!ieee80211_verify_peer_he_mcs_support(sdata, (void *)elems->he_cap,

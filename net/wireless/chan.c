@@ -1229,12 +1229,18 @@ static bool cfg80211_secondary_chans_ok(struct wiphy *wiphy,
 
 	for (freq = start_freq; freq <= end_freq; freq += MHZ_TO_KHZ(20)) {
 		c = ieee80211_get_channel_khz(wiphy, freq);
-		if (!c)
+		if (!c) {
+			pr_info("secondary-chans-ok, could not get channel for freq: %d\n",
+				freq);
 			return false;
+		}
 		if (c->flags & permitting_flags)
 			continue;
-		if (c->flags & prohibited_flags)
+		if (c->flags & prohibited_flags) {
+			pr_info("secondary-chans-ok, channel freq: %d is prohibited: 0x%x\n",
+				freq, c->flags);
 			return false;
+		}
 	}
 
 	return true;
