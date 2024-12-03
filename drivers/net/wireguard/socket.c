@@ -113,7 +113,7 @@ static int send6(struct wg_device *wg, struct sk_buff *skb,
 	int ret = 0;
 
 	if (wg->lowerdev)
-		fl.flowi6_oif = wg->lowerdev,
+		fl.flowi6_oif = wg->lowerdev;
 
 	skb_mark_not_on_list(skb);
 	skb->dev = wg->dev;
