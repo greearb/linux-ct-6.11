@@ -642,11 +642,23 @@ static void iwl_mvm_update_link_sig(struct ieee80211_vif *vif, int sig,
 				    struct iwl_mvm_vif_link_info *link_info,
 				    struct ieee80211_bss_conf *bss_conf)
 {
-	struct iwl_mvm *mvm = iwl_mvm_vif_from_mac80211(vif)->mvm;
+	struct iwl_mvm_vif *mvmvif = iwl_mvm_vif_from_mac80211(vif);
+	struct iwl_mvm *mvm = mvmvif->mvm;
 	int thold = bss_conf->cqm_rssi_thold;
 	int hyst = bss_conf->cqm_rssi_hyst;
 	int last_event;
 	s8 exit_esr_thresh;
+
+	/* For reasons unknown, but possibly related to disabling beacon filtering,
+	 * the beacon average is reported incorrectly on the second link in at least
+	 * some cases.  So, if we have disabled beacon filtering, use
+	 * what the link is actually reporting for received frames.
+	 */
+	if (!mvmvif->bf_enabled) {
+		int esig = -ewma_signal_read(&link_info->rx_avg_signal);
+		if (esig)
+			sig = esig;
+	}
 
 	if (sig == 0) {
 		IWL_DEBUG_RX(mvm, "RSSI is 0 - skip signal based decision\n");
@@ -712,10 +724,16 @@ static void iwl_mvm_update_link_sig(struct ieee80211_vif *vif, int sig,
 					    &bss_conf->chanreq.oper,
 					    true);
 
-	if (sig < exit_esr_thresh)
+	if (sig < exit_esr_thresh) {
+		IWL_DEBUG_INFO(mvm,
+			       "esr: update-link-sig-low-rssi, Link %d link-info-sig: %d sig: %d  thresh: %d freq: %d\n",
+			       bss_conf->link_id, link_info->beacon_stats.avg_signal,
+			       sig, exit_esr_thresh, link_info->phy_ctxt->center_freq1);
+
 		iwl_mvm_exit_esr(mvm, vif, IWL_MVM_ESR_EXIT_LOW_RSSI,
 				 iwl_mvm_get_other_link(vif,
 							bss_conf->link_id));
+	}
 }
 
 static void iwl_mvm_stat_iterator(void *_data, u8 *mac,
