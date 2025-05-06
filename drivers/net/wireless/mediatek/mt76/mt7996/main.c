@@ -259,7 +259,7 @@ static int mt7996_add_interface(struct ieee80211_hw *hw,
 		ret = -ENOSPC;
 		goto out;
 	}
-	else if (idx > HW_BSSID_3) {
+	else if (idx > HW_BSSID_3 || idx == HW_BSSID_0) {
 		vif->netdev_features &= ~NETIF_F_HW_CSUM;
 	}
 	mvif->mt76.omac_idx = idx;
