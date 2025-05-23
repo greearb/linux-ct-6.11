@@ -5404,6 +5404,12 @@ ieee80211_determine_our_sta_mode(struct ieee80211_sub_if_data *sdata,
 		goto out;
 	}
 
+	if (!vht_cap.vht_supported) {
+		mlme_link_id_dbg(sdata, link_id,
+				 "no VHT support on any band, limiting to HT\n");
+		goto out;
+	}
+
 	/* VHT - if we have - is fine, including 80 MHz, check 160 below again */
 	if (sband->band != NL80211_BAND_2GHZ) {
 		conn->bw_limit = IEEE80211_CONN_BW_LIMIT_160;
