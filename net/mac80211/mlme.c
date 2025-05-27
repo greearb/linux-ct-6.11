@@ -5327,6 +5327,7 @@ ieee80211_determine_our_sta_mode(struct ieee80211_sub_if_data *sdata,
 				 struct ieee80211_conn_settings *conn)
 {
 	struct ieee80211_sta_ht_cap sta_ht_cap = sband->ht_cap;
+	bool is_2ghz = sband->band == NL80211_BAND_2GHZ;
 	bool is_5ghz = sband->band == NL80211_BAND_5GHZ;
 	bool is_6ghz = sband->band == NL80211_BAND_6GHZ;
 	const struct ieee80211_sta_he_cap *he_cap;
@@ -5404,9 +5405,9 @@ ieee80211_determine_our_sta_mode(struct ieee80211_sub_if_data *sdata,
 		goto out;
 	}
 
-	if (!vht_cap.vht_supported) {
+	if (!vht_cap.vht_supported && is_2ghz) {
 		mlme_link_id_dbg(sdata, link_id,
-				 "no VHT support on any band, limiting to HT\n");
+				 "no VHT support on 2.4 GHz, limiting to HT\n");
 		goto out;
 	}
 
