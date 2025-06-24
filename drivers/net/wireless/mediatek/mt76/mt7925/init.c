@@ -223,6 +223,8 @@ int mt7925_register_device(struct mt792x_dev *dev)
 	dev->mt76.phy.priv = &dev->phy;
 	dev->mt76.tx_worker.fn = mt792x_tx_worker;
 
+	dev->could_eht = true;
+
 	INIT_DELAYED_WORK(&dev->pm.ps_work, mt792x_pm_power_save_work);
 	INIT_WORK(&dev->pm.wake_work, mt792x_pm_wake_work);
 	spin_lock_init(&dev->pm.wake.lock);
