@@ -600,7 +600,6 @@ static void __mt7996_configure_filter(struct ieee80211_hw *hw,
 			   MT_WF_RFCR_DROP_STBC_MULTI);
 
 	MT76_FILTER(OTHER_BSS, MT_WF_RFCR_DROP_OTHER_TIM |
-			       MT_WF_RFCR_DROP_A3_MAC |
 			       MT_WF_RFCR_DROP_A3_BSSID);
 
 	MT76_FILTER(FCSFAIL, MT_WF_RFCR_DROP_FCSFAIL);
